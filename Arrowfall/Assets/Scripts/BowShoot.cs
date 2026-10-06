@@ -122,6 +122,13 @@ public class BowShoot : MonoBehaviour
 
         GameObject arrow = Instantiate(arrowPrefab, spawnPos, transform.rotation);
 
+        // Arrows spawn inside the player's capsule, so ignore it or they hit us first.
+        Collider arrowCollider = arrow.GetComponent<Collider>();
+        if (arrowCollider != null && playerController != null)
+        {
+            Physics.IgnoreCollision(arrowCollider, playerController);
+        }
+
         Arrow arrowScript = arrow.GetComponent<Arrow>();
         if (arrowScript != null)
         {
