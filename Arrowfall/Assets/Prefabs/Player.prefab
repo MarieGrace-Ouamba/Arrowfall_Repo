@@ -119,7 +119,7 @@ GameObject:
   - component: {fileID: 478212024801593098}
   - component: {fileID: 7841933499245748353}
   - component: {fileID: 8338034484086012077}
-  - component: {fileID: 8238221213795102564}
+  - component: {fileID: 3317613020170073787}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -136,7 +136,7 @@ Transform:
   m_GameObject: {fileID: 2450253338746013002}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.8, z: 0}
+  m_LocalPosition: {x: 0, y: 1.86, z: -0.04}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -248,7 +248,7 @@ MonoBehaviour:
   arrowPrefab: {fileID: 6225888053948203410, guid: 4d92b44c17014f74785db8b58585d8d3, type: 3}
   firePoint: {fileID: 4933351068882577172}
   spawnDistance: 0.8
---- !u!114 &8238221213795102564
+--- !u!114 &3317613020170073787
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
