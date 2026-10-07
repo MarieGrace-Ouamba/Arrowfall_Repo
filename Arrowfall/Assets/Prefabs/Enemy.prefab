@@ -189,6 +189,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   maxHealth: 100
+  hitSounds:
+  - {fileID: 8300000, guid: cdc2a36674b95cd4c95a9f37b47d799c, type: 3}
+  hitVolume: 0.579
+  soundHeight: 1.3
   removeDelay: 0
 --- !u!114 &8955947645458860787
 MonoBehaviour:
