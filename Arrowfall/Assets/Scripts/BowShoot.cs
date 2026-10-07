@@ -4,6 +4,7 @@
 // Hold left mouse to draw the bow, release to fire.
 // The bow swings across to the right quickly, then pulls back over the rest of the draw.
 // A longer draw means a faster, harder-hitting arrow.
+// Plays a creak while drawing and a twang when the arrow leaves.
 
 using UnityEngine;
 
@@ -24,7 +25,7 @@ public class BowShoot : MonoBehaviour
     public float sprintBobSpeed = 13f;
     public float sprintBobAmount = 0.03f;
     public float bobSmoothing = 6f;        // how quickly bob eases in and out
-    
+
     private float bobTimer = 0f;
     private Vector3 bobOffset = Vector3.zero;
     private CharacterController playerController;
@@ -45,6 +46,16 @@ public class BowShoot : MonoBehaviour
     public Transform firePoint;             // empty object on the bow where arrows leave
     public float spawnDistance = 0.8f;      // fallback if no fire point is assigned
 
+    [Header("Sound")]
+    public AudioSource audioSource;         // found automatically on this object if left empty
+    public AudioClip drawSound;             // the creak of the string pulling back
+    public float drawSoundCutoff = 0.8f;    // seconds into the draw clip to stop, before any release sound in it
+    public AudioClip releaseSound;          // the twang when the arrow leaves
+    [Range(0f, 1f)]
+    public float drawVolume = 0.8f;
+    [Range(0f, 1f)]
+    public float releaseVolume = 1f;
+
     private float drawTime = 0f;
     private bool isDrawing = false;
 
@@ -54,6 +65,7 @@ public class BowShoot : MonoBehaviour
         {
             isDrawing = true;
             drawTime = 0f;
+            PlayDrawSound();
         }
 
         if (isDrawing && Input.GetMouseButton(0))
@@ -63,6 +75,8 @@ public class BowShoot : MonoBehaviour
             {
                 drawTime = maxDrawTime;
             }
+
+            StopDrawSoundAtCutoff();
         }
 
         if (isDrawing && Input.GetMouseButtonUp(0))
@@ -80,7 +94,7 @@ public class BowShoot : MonoBehaviour
     // then slides back toward the player for the rest of the hold.
     void MoveBow()
     {
-        
+
         if (bowTransform == null)
         {
             return;
@@ -103,6 +117,12 @@ public class BowShoot : MonoBehaviour
 
     void Fire()
     {
+        // The creak ends the moment the string is let go.
+        if (audioSource != null)
+        {
+            audioSource.Stop();
+        }
+
         if (arrowPrefab == null)
         {
             Debug.LogWarning("BowShoot has no arrow prefab assigned.");
@@ -141,7 +161,49 @@ public class BowShoot : MonoBehaviour
             rb.linearVelocity = transform.forward * speed;
         }
 
+        PlayReleaseSound(charge);
+
         Debug.Log("Draw " + drawTime.ToString("F2") + "s, speed " + speed + ", damage " + damage);
+    }
+
+    // Starts the creak from the beginning each time the draw starts.
+    void PlayDrawSound()
+    {
+        if (audioSource == null || drawSound == null)
+        {
+            return;
+        }
+
+        audioSource.pitch = 1f;
+        audioSource.clip = drawSound;
+        audioSource.volume = drawVolume;
+        audioSource.Play();
+    }
+
+    // The draw clip has its own release sound later in it, so stop before reaching that part.
+    void StopDrawSoundAtCutoff()
+    {
+        if (audioSource == null || drawSound == null)
+        {
+            return;
+        }
+
+        if (audioSource.isPlaying && audioSource.clip == drawSound && audioSource.time >= drawSoundCutoff)
+        {
+            audioSource.Stop();
+        }
+    }
+
+    // A fuller draw gives a louder twang. A small pitch change keeps repeated shots from sounding identical.
+    void PlayReleaseSound(float charge)
+    {
+        if (audioSource == null || releaseSound == null)
+        {
+            return;
+        }
+
+        audioSource.pitch = Random.Range(0.95f, 1.05f);
+        audioSource.PlayOneShot(releaseSound, releaseVolume * Mathf.Lerp(0.5f, 1f, charge));
     }
 
     // Lets other scripts read the draw for a UI bar later. 0 to 1.
@@ -151,10 +213,15 @@ public class BowShoot : MonoBehaviour
     }
     void Awake()
     {
-        
+
         // The controller lives on the player, which is this camera's parent.
         playerController = GetComponentInParent<CharacterController>();
         Debug.Log("Bow found controller: " + (playerController != null));
+
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
     }
     // Figures out a small up-and-side offset based on how fast the player is moving.
     // Standing still lets it settle back to zero.

@@ -16,6 +16,7 @@ public class PlayerHealth : MonoBehaviour
     [Header("UI")]
     public Slider healthBar;               // drag the health bar slider here
     public Image fillImage;                // drag the slider's Fill object here
+    public GameOverScreen gameOverScreen;  // drag the Canvas (it has GameOverScreen) here
 
     [Header("Bar colors")]
     public Color fullColor = Color.green;
@@ -119,7 +120,7 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-    // For now, dying just freezes the player. A game over screen can hook in here later.
+    // Stops the player and shows the game over screen.
     void Die()
     {
         isDead = true;
@@ -141,6 +142,11 @@ public class PlayerHealth : MonoBehaviour
         if (bow != null)
         {
             bow.enabled = false;
+        }
+
+        if (gameOverScreen != null)
+        {
+            gameOverScreen.Show();
         }
     }
 }
