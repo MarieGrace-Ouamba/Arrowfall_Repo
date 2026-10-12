@@ -36,6 +36,9 @@ public class EnemyChase : MonoBehaviour
 
     void Update()
     {
+        // TEMP DEBUG - remove before committing
+        Debug.Log("NavMesh: " + agent.isOnNavMesh + "  Player set: " + (player != null) + "  Sees: " + CanSeePlayer());
+
         if (!agent.isOnNavMesh)
         {
             PlayAnimation("Idle");
@@ -146,9 +149,15 @@ public class EnemyChase : MonoBehaviour
             if (hit.transform.IsChildOf(player))
                 continue;
 
+            // TEMP DEBUG - remove before committing
+            Debug.Log("Sight blocked by: " + hit.transform.name);
+
             return false;
         }
 
         return true;
     }
 }
+
+
+
