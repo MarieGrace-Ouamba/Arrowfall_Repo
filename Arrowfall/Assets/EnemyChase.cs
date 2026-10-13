@@ -21,6 +21,15 @@ public class EnemyChase : MonoBehaviour
 
     void Start()
     {
+        // Find the player if the slot is empty or points at the prefab file
+        // instead of the player in the scene, so guards work in any scene.
+        if (player == null || !player.gameObject.scene.IsValid())
+        {
+            PlayerMovement playerMovement = FindObjectOfType<PlayerMovement>();
+            if (playerMovement != null)
+                player = playerMovement.transform;
+        }
+
         agent = GetComponent<NavMeshAgent>();
         agent.speed = chaseSpeed;
         agent.stoppingDistance = attackDistance * 0.8f;
@@ -36,6 +45,9 @@ public class EnemyChase : MonoBehaviour
 
     void Update()
     {
+        // TEMP DEBUG - remove before committing
+        Debug.Log(name + "  NavMesh: " + agent.isOnNavMesh + "  Sees: " + CanSeePlayer());
+
         if (!agent.isOnNavMesh)
         {
             PlayAnimation("Idle");
@@ -145,6 +157,9 @@ public class EnemyChase : MonoBehaviour
 
             if (hit.transform.IsChildOf(player))
                 continue;
+
+            // TEMP DEBUG - remove before committing
+            Debug.Log(name + "  Sight blocked by: " + hit.transform.name);
 
             return false;
         }
