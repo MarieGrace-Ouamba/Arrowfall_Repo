@@ -5,6 +5,7 @@
 // The bow swings across to the right quickly, then pulls back over the rest of the draw.
 // A longer draw means a faster, harder-hitting arrow.
 // Plays a creak while drawing and a twang when the arrow leaves.
+// Arrows leave from the bow but are aimed at whatever sits under the middle of the screen.
 
 using UnityEngine;
 
@@ -45,6 +46,9 @@ public class BowShoot : MonoBehaviour
     public GameObject arrowPrefab;
     public Transform firePoint;             // empty object on the bow where arrows leave
     public float spawnDistance = 0.8f;      // fallback if no fire point is assigned
+
+    [Header("Aim")]
+    public float maxAimDistance = 200f;     // how far to look for something under the crosshair
 
     [Header("Sound")]
     public AudioSource audioSource;         // found automatically on this object if left empty
@@ -140,7 +144,9 @@ public class BowShoot : MonoBehaviour
             ? firePoint.position
             : transform.position + transform.forward * spawnDistance;
 
-        GameObject arrow = Instantiate(arrowPrefab, spawnPos, transform.rotation);
+        // Point the arrow from the bow at the spot under the crosshair.
+        Vector3 direction = AimDirection(spawnPos);
+        GameObject arrow = Instantiate(arrowPrefab, spawnPos, Quaternion.LookRotation(direction));
 
         // Arrows spawn inside the player's capsule, so ignore it or they hit us first.
         Collider arrowCollider = arrow.GetComponent<Collider>();
@@ -158,12 +164,36 @@ public class BowShoot : MonoBehaviour
         Rigidbody rb = arrow.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.linearVelocity = transform.forward * speed;
+            rb.linearVelocity = direction * speed;
         }
 
         PlayReleaseSound(charge);
 
         Debug.Log("Draw " + drawTime.ToString("F2") + "s, speed " + speed + ", damage " + damage);
+    }
+
+    // Finds what sits under the middle of the screen and returns the direction from the bow to it.
+    // Without this, arrows fly parallel to the view and land off to the side of the crosshair,
+    // because the bow is not in the middle of the screen.
+    Vector3 AimDirection(Vector3 spawnPos)
+    {
+        Vector3 aimPoint = transform.position + transform.forward * maxAimDistance;
+
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit,
+                            maxAimDistance, ~0, QueryTriggerInteraction.Ignore))
+        {
+            aimPoint = hit.point;
+        }
+
+        Vector3 direction = aimPoint - spawnPos;
+
+        // A target closer than the bow itself would send the arrow backwards, so shoot straight ahead instead.
+        if (Vector3.Dot(direction, transform.forward) <= 0.1f)
+        {
+            return transform.forward;
+        }
+
+        return direction.normalized;
     }
 
     // Starts the creak from the beginning each time the draw starts.
