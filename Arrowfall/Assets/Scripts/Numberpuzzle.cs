@@ -3,15 +3,13 @@
 // IT 485/585 - ArrowFall
 // The gate puzzle, run as one sequence from start to finish:
 //   1. Wait until every guard is dead, then announce it.
-//   2. Wait for the player to come to the gate.
-//   3. Explain DIGIT and COUNT, then count down.
-//   4. Warm-up rounds: the digit and the count match ("2 2"), so either answer is right.
-//   5. Challenge rounds: they differ, and each round randomly asks for DIGIT or COUNT.
-//   6. When every round is cleared, the gate opens.
-// The screen shows one digit repeated a number of times, like "3 3":
-// DIGIT is the number shown (3), COUNT is how many there are (2).
-// Challenge rounds have a draining timer, paused while the player is away from the gate.
-// The warm-up is untimed.
+//   2. Wait for the player to come to the gate, then count down.
+//   3. Warm-up: a couple of untimed rounds. Hit the number shown. Misses do not count.
+//   4. Main rounds: they get harder as they go. The time limit shrinks each round,
+//      and from a set round on, the targets swap their numbers every round.
+//      Three misses (wrong target or too slow) restart the main rounds.
+//   5. When every main round is cleared, the gate opens.
+// An optional EnemySpawner keeps sending guards while the rounds run.
 
 using System.Collections;
 using TMPro;
@@ -20,12 +18,6 @@ using UnityEngine.UI;
 
 public class NumberPuzzle : MonoBehaviour
 {
-    public enum Rule
-    {
-        Digit,          // hit the number that is shown
-        Count           // hit how many numbers are shown
-    }
-
     enum Result
     {
         None,
@@ -39,20 +31,20 @@ public class NumberPuzzle : MonoBehaviour
 
     [Header("UI")]
     public GameObject panel;                 // the whole puzzle panel, shown and hidden as one
-    public Image panelImage;                 // the panel background, flashes green or red
-    public TMP_Text displayText;             // the big numbers
-    public Image ruleBadge;                  // colored box behind the rule word
-    public TMP_Text ruleText;                // DIGIT or COUNT
-    public GameObject timerBar;              // the timer's background, holding the fill
+    public Image panelImage;                 // the panel background, flashes green or red (optional)
+    public TMP_Text displayText;             // the big number
+    public Image ruleBadge;                  // the box holding the instruction (optional)
+    public TMP_Text ruleText;                // the instruction above the number
+    public GameObject timerBar;              // the timer bar, only shown in timed rounds
     public Image timerFill;                  // Image Type: Filled, Fill Method: Horizontal
-    public TMP_Text progressText;            // dots for cleared rounds
+    public TMP_Text progressText;            // progress dots and misses
     public TMP_Text messageText;             // Correct, Wrong, announcements
 
+    [Header("Text")]
+    public string instruction = "HIT";       // shown above the number each round
+
     [Header("Colors")]
-    public Color panelColor = new Color(0f, 0f, 0f, 0.65f);
-    public bool backgroundOnlyDuringRounds = true;   // announcements and the tutorial show text with no box behind it
-    public Color digitColor = new Color(1f, 0.78f, 0.2f);
-    public Color countColor = new Color(0.2f, 0.8f, 1f);
+    public Color panelColor = new Color(0f, 0f, 0f, 0f);
     public Color correctColor = new Color(0.2f, 0.75f, 0.3f, 0.85f);
     public Color wrongColor = new Color(0.85f, 0.15f, 0.15f, 0.85f);
     public Color timerColor = Color.white;
@@ -62,30 +54,30 @@ public class NumberPuzzle : MonoBehaviour
     public bool waitForGuards = true;        // the puzzle begins only after these guards are dead
     public EnemyHealth[] guards;             // leave empty to use every guard in the level
     public string guardsClearedMessage = "Outside guards eliminated";
-    public float messageTime = 2.5f;         // seconds the announcement stays up
-    public int startCountdown = 3;           // "3, 2, 1" before the first round
+    public float messageTime = 2.5f;         // seconds announcements stay up
+    public int startCountdown = 3;           // "3, 2, 1" before the warm-up
 
-    [Header("Tutorial")]
-    public bool showTutorial = true;         // explains DIGIT and COUNT before the warm-up
-    public bool advanceOnHit = true;         // each explanation waits until the player shoots any target
-    public float slideTime = 4f;             // used instead when advanceOnHit is off
-    public float challengeIntroTime = 3f;    // seconds the "now they differ" message stays up
+    [Header("Enemies During Puzzle")]
+    public EnemySpawner spawner;             // optional, keeps sending guards while the puzzle runs
+    public bool spawnDuringWarmup = false;   // tick to start spawning from the warm-up instead of the main rounds
 
     [Header("Visibility")]
-    public float showDistance = 30f;         // the panel appears when the player is this close to the puzzle
-    public float hideAfterSolved = 3f;       // seconds the "gate opens" message stays before hiding
+    public float showDistance = 25f;         // the panel appears when the player is this close to the puzzle
 
     [Header("Rounds")]
-    public int warmupRounds = 4;
-    public int challengeRounds = 6;
-    public bool restartOnMistake = true;     // a wrong hit sends the player back to the first challenge round
-    public int maxSameRuleInARow = 2;        // stops long streaks of the same random rule
+    public int warmupRounds = 2;             // untimed practice rounds, misses do not count
+    public int mainRounds = 6;               // rounds that get harder and must all be cleared
+    public int maxMisses = 3;                // this many misses restarts the main rounds
     [Range(2, 4)]
     public int highestNumber = 4;            // must match the targets, numbered 1 up to this
 
+    [Header("Difficulty")]
+    public float startRoundTime = 6f;        // seconds allowed in the first main round
+    public float endRoundTime = 2.5f;        // seconds allowed in the last main round
+    public int shuffleFromRound = 4;         // from this main round on, targets swap numbers every round (0 = never)
+    public bool timeoutCountsAsMiss = true;  // running out of time counts toward the misses
+
     [Header("Timing")]
-    public float roundTime = 6f;             // seconds per round before it changes, 0 = no limit
-    public bool timeoutCountsAsMistake = false;    // tick to treat running out of time like a wrong hit
     public float pauseBetweenRounds = 0.8f;
 
     [Header("Sound")]
@@ -100,25 +92,20 @@ public class NumberPuzzle : MonoBehaviour
 
     private Transform player;
     private bool panelWanted = false;        // true once the puzzle has something to show
-    private bool solved = false;
-    private float solvedTime = 0f;
     private float forceShowUntil = 0f;       // keeps the panel up for announcements, even far away
 
     private bool acceptingHits = false;      // only true while a round is waiting for an answer
     private Result pendingResult = Result.None;
     private int answer;
+    private int lastNumber = 0;
 
-    private int round = 0;
-    private int lastDigit = 0;
-    private int lastCount = 0;
-    private Rule lastRule = Rule.Digit;
-    private int sameRuleCount = 0;
-    private int digitUses = 0;               // how often each rule has come up, to keep them balanced
-    private int countUses = 0;
+    private bool inWarmup = true;
+    private int warmupDone = 0;
+    private int mainDone = 0;
+    private int misses = 0;
 
-    private bool showBackground = false;     // the tinted box is only drawn during rounds
-    private bool waitingForTutorialHit = false;
-    private bool tutorialHit = false;
+    private NumberTarget[] targets;
+    private int[] originalNumbers;           // each target's own number, restored when not shuffling
 
     private float flashAmount = 0f;
     private Color flashColor;
@@ -131,14 +118,17 @@ public class NumberPuzzle : MonoBehaviour
         {
             player = playerMovement.transform;
         }
-        else
-        {
-            Log("No player found. The panel will always count as near.");
-        }
 
         if (guards == null || guards.Length == 0)
         {
             guards = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
+        }
+
+        targets = FindObjectsByType<NumberTarget>(FindObjectsSortMode.None);
+        originalNumbers = new int[targets.Length];
+        for (int i = 0; i < targets.Length; i++)
+        {
+            originalNumbers[i] = targets[i].number;
         }
 
         ShowRoundUI(false);
@@ -159,11 +149,6 @@ public class NumberPuzzle : MonoBehaviour
         AnimatePop();
 
         bool show = panelWanted && (IsPlayerNear() || Time.time < forceShowUntil);
-
-        if (solved && Time.time - solvedTime > hideAfterSolved)
-        {
-            show = false;
-        }
 
         if (panel != null && panel.activeSelf != show)
         {
@@ -194,7 +179,7 @@ public class NumberPuzzle : MonoBehaviour
 
         panelWanted = true;
 
-        // 2. Player at the gate.
+        // 2. Player at the gate, then countdown.
         Log("Waiting for the player to come within " + showDistance + " m.");
         SetText(displayText, "");
         SetText(messageText, "");
@@ -202,13 +187,6 @@ public class NumberPuzzle : MonoBehaviour
         while (!IsPlayerNear())
         {
             yield return null;
-        }
-
-        // 3. Explanation and countdown.
-        if (showTutorial)
-        {
-            Log("Tutorial.");
-            yield return StartCoroutine(Tutorial());
         }
 
         for (int i = startCountdown; i > 0; i--)
@@ -219,237 +197,208 @@ public class NumberPuzzle : MonoBehaviour
             yield return new WaitForSeconds(1f);
         }
 
-        // 4 and 5. Rounds.
-        Log("Rounds start.");
-        showBackground = true;
         ShowRoundUI(true);
-        round = 0;
-        int totalRounds = warmupRounds + challengeRounds;
 
-        while (round < totalRounds)
+        // 3. Warm-up: untimed, misses do not count.
+        if (spawner != null && spawnDuringWarmup)
         {
-            bool warmup = round < warmupRounds;
-            SetUpRound(warmup);
+            spawner.StartSpawning();
+        }
 
-            // Wait for a hit or for the timer to run out.
-            pendingResult = Result.None;
-            acceptingHits = true;
-            float timeLeft = roundTime;
+        inWarmup = true;
+        warmupDone = 0;
 
-            while (pendingResult == Result.None)
-            {
-                // The warm-up has no time limit; only the challenge is timed.
-                if (!warmup && roundTime > 0f && IsPlayerNear())
-                {
-                    timeLeft -= Time.deltaTime;
-                    UpdateTimerBar(timeLeft);
+        while (warmupDone < warmupRounds)
+        {
+            SetUpRound(0f, false);
+            yield return StartCoroutine(WaitForResult(0f));
 
-                    if (timeLeft <= 0f)
-                    {
-                        pendingResult = Result.TimeUp;
-                    }
-                }
-
-                yield return null;
-            }
-
-            acceptingHits = false;
-
-            // React to the answer.
             if (pendingResult == Result.Correct)
             {
-                PlaySound(correctSound);
-                Flash(correctColor);
-                round++;
-                UpdateProgress();
+                Correct();
+                warmupDone++;
                 SetText(messageText, "Correct!");
-                yield return new WaitForSeconds(pauseBetweenRounds);
-
-                // The warm-up just ended, so prepare the player for the real thing.
-                if (round == warmupRounds && challengeRounds > 0)
-                {
-                    SetText(displayText, "");
-                    SetBadgeVisible(false);
-                    SetText(messageText, "Warm-up done! Now they differ");
-                    yield return new WaitForSeconds(challengeIntroTime);
-                }
             }
             else
             {
-                PlaySound(wrongSound);
-                Flash(wrongColor);
+                Miss();
+                SetText(messageText, "Wrong! Try again");
+            }
 
-                bool mistake = pendingResult == Result.Wrong || timeoutCountsAsMistake;
-                string message = (pendingResult == Result.TimeUp) ? "Too slow!" : "Wrong!";
+            UpdateProgress();
+            yield return new WaitForSeconds(pauseBetweenRounds);
+        }
 
-                if (mistake && restartOnMistake && round > warmupRounds)
-                {
-                    round = warmupRounds;
-                    message += " Start the challenge again";
-                }
+        if (warmupRounds > 0)
+        {
+            ShowRoundUI(false);
+            SetText(displayText, "");
+            SetText(messageText, "Warm-up done!");
+            yield return new WaitForSeconds(messageTime);
+            ShowRoundUI(true);
+        }
 
+        // 4. Main rounds: shrinking time, shuffled targets later on, three misses restart.
+        if (spawner != null)
+        {
+            spawner.StartSpawning();
+        }
+
+        inWarmup = false;
+        mainDone = 0;
+        misses = 0;
+
+        while (mainDone < mainRounds)
+        {
+            float progress = (mainRounds > 1) ? (float)mainDone / (mainRounds - 1) : 1f;
+            float roundTime = Mathf.Lerp(startRoundTime, endRoundTime, progress);
+            bool shuffle = shuffleFromRound > 0 && (mainDone + 1) >= shuffleFromRound;
+
+            SetUpRound(roundTime, shuffle);
+            yield return StartCoroutine(WaitForResult(roundTime));
+
+            if (pendingResult == Result.Correct)
+            {
+                Correct();
+                mainDone++;
+                SetText(messageText, "Correct!");
+                UpdateProgress();
+                yield return new WaitForSeconds(pauseBetweenRounds);
+                continue;
+            }
+
+            Miss();
+            bool counts = pendingResult == Result.Wrong || timeoutCountsAsMiss;
+            string message = (pendingResult == Result.TimeUp) ? "Too slow!" : "Wrong!";
+
+            if (counts)
+            {
+                misses++;
+            }
+
+            if (misses >= maxMisses)
+            {
+                Log(maxMisses + " misses, restarting the main rounds.");
+                mainDone = 0;
+                misses = 0;
+                UpdateProgress();
+                SetText(messageText, maxMisses + " misses! Starting over");
+                yield return new WaitForSeconds(messageTime);
+            }
+            else
+            {
                 UpdateProgress();
                 SetText(messageText, message);
                 yield return new WaitForSeconds(pauseBetweenRounds);
             }
         }
 
-        // 6. Done.
+        // 5. Done.
         Solve();
     }
 
-    // Two slides with the same example, then a note about the first rounds.
-    // Each one stays until the player shoots any target, so nobody gets rushed.
-    IEnumerator Tutorial()
+    // Waits for a target hit, or for the time limit if the round is timed.
+    IEnumerator WaitForResult(float roundTime)
     {
-        SetBadgeVisible(true);
-        ShowSlide(Rule.Digit, "3   3", "DIGIT: hit the number shown (3)");
-        yield return StartCoroutine(WaitForSlide());
+        pendingResult = Result.None;
+        acceptingHits = true;
+        float timeLeft = roundTime;
 
-        ShowSlide(Rule.Count, "3   3", "COUNT: hit how many there are (2)");
-        yield return StartCoroutine(WaitForSlide());
-
-        SetBadgeVisible(false);
-        SetText(displayText, "2   2");
-        SetText(messageText, "First rounds: both answers match");
-        Pop();
-        yield return StartCoroutine(WaitForSlide());
-    }
-
-    // Waits for any target hit, or for slideTime if advanceOnHit is off.
-    IEnumerator WaitForSlide()
-    {
-        if (!advanceOnHit)
+        while (pendingResult == Result.None)
         {
-            yield return new WaitForSeconds(slideTime);
-            yield break;
-        }
+            // The clock only runs while the player is at the gate.
+            if (roundTime > 0f && IsPlayerNear())
+            {
+                timeLeft -= Time.deltaTime;
+                UpdateTimerBar(timeLeft, roundTime);
 
-        tutorialHit = false;
-        waitingForTutorialHit = true;
+                if (timeLeft <= 0f)
+                {
+                    pendingResult = Result.TimeUp;
+                }
+            }
 
-        while (!tutorialHit)
-        {
             yield return null;
         }
 
-        waitingForTutorialHit = false;
-        yield return new WaitForSeconds(0.3f);
+        acceptingHits = false;
     }
 
-    void ShowSlide(Rule rule, string example, string explanation)
+    // Picks a new number, sets the targets, and puts everything on screen.
+    void SetUpRound(float roundTime, bool shuffle)
     {
-        ShowRule(rule);
-        SetText(displayText, example);
-        SetText(messageText, explanation);
-        Pop();
-    }
-
-    // Picks the numbers and the rule for one round and puts them on screen.
-    void SetUpRound(bool warmup)
-    {
-        int digit;
-        int count;
-        Rule rule = ChooseRule();
-
-        if (warmup)
+        if (shuffle)
         {
-            // Digit and count match, so either rule gives the same answer.
-            do
-            {
-                digit = Random.Range(1, highestNumber + 1);
-            }
-            while (digit == lastDigit);
-
-            count = digit;
-            answer = digit;
+            ShuffleTargets();
         }
         else
         {
-            // Digit and count differ, and never repeat the last round exactly.
-            do
-            {
-                digit = Random.Range(1, highestNumber + 1);
-                count = Random.Range(1, highestNumber + 1);
-            }
-            while (digit == count || (digit == lastDigit && count == lastCount));
-
-            answer = (rule == Rule.Digit) ? digit : count;
+            RestoreTargets();
         }
 
-        lastDigit = digit;
-        lastCount = count;
+        // A different number from last round, so every round visibly changes.
+        do
+        {
+            answer = Random.Range(1, highestNumber + 1);
+        }
+        while (answer == lastNumber);
 
-        SetText(displayText, BuildDisplay(digit, count));
-        SetText(messageText, "");
-        ShowRule(rule);
-        SetBadgeVisible(true);
+        lastNumber = answer;
+
+        SetText(ruleText, instruction);
+        SetText(displayText, answer.ToString());
+        SetText(messageText, shuffle ? "The targets have moved!" : "");
 
         if (timerBar != null)
         {
-            timerBar.SetActive(!warmup && roundTime > 0f);
+            timerBar.SetActive(roundTime > 0f);
         }
-        UpdateTimerBar(roundTime);
+        UpdateTimerBar(roundTime, roundTime);
         UpdateProgress();
         Pop();
 
-        Log("Round " + (round + 1) + ": " + rule + ", showing " + digit + " x" + count + ", answer " + answer);
+        string stage = inWarmup ? "Warm-up " + (warmupDone + 1) : "Main " + (mainDone + 1);
+        Log(stage + ": hit " + answer + (roundTime > 0f ? ", " + roundTime.ToString("F1") + " s" : ", untimed")
+            + (shuffle ? ", targets shuffled" : ""));
     }
 
-    // DIGIT or COUNT at random, with two limits so it never feels one-sided:
-    // never more than maxSameRuleInARow of the same in a row,
-    // and if one rule has come up two more times than the other, the other one is next.
-    Rule ChooseRule()
+    // Gives the targets their numbers in a random order and updates their labels.
+    void ShuffleTargets()
     {
-        Rule pick = (Random.value < 0.5f) ? Rule.Digit : Rule.Count;
+        int[] numbers = (int[])originalNumbers.Clone();
 
-        if (digitUses - countUses >= 2)
+        for (int i = numbers.Length - 1; i > 0; i--)
         {
-            pick = Rule.Count;
-        }
-        else if (countUses - digitUses >= 2)
-        {
-            pick = Rule.Digit;
-        }
-        else if (pick == lastRule && sameRuleCount >= maxSameRuleInARow)
-        {
-            pick = (pick == Rule.Digit) ? Rule.Count : Rule.Digit;
+            int j = Random.Range(0, i + 1);
+            int temp = numbers[i];
+            numbers[i] = numbers[j];
+            numbers[j] = temp;
         }
 
-        if (pick == Rule.Digit)
-        {
-            digitUses++;
-        }
-        else
-        {
-            countUses++;
-        }
+        ApplyNumbers(numbers);
+    }
 
-        if (pick == lastRule)
-        {
-            sameRuleCount++;
-        }
-        else
-        {
-            lastRule = pick;
-            sameRuleCount = 1;
-        }
+    // Puts every target back on its own number.
+    void RestoreTargets()
+    {
+        ApplyNumbers(originalNumbers);
+    }
 
-        return pick;
+    void ApplyNumbers(int[] numbers)
+    {
+        for (int i = 0; i < targets.Length; i++)
+        {
+            targets[i].number = numbers[i];
+            if (targets[i].label != null)
+            {
+                targets[i].label.text = numbers[i].ToString();
+            }
+        }
     }
 
     // Called by a NumberTarget when an arrow hits it.
     public void TargetHit(NumberTarget target)
     {
-        // During the explanation, any target moves to the next slide.
-        if (waitingForTutorialHit)
-        {
-            tutorialHit = true;
-            Flash(correctColor);
-            Log("Tutorial: target " + target.number + " hit, next slide.");
-            return;
-        }
-
         if (!acceptingHits || pendingResult != Result.None)
         {
             Log("Target " + target.number + " hit, but no round is waiting for an answer.");
@@ -460,14 +409,29 @@ public class NumberPuzzle : MonoBehaviour
         Log("Target " + target.number + " hit: " + pendingResult);
     }
 
+    void Correct()
+    {
+        PlaySound(correctSound);
+        Flash(correctColor);
+    }
+
+    void Miss()
+    {
+        PlaySound(wrongSound);
+        Flash(wrongColor);
+    }
+
+    // The panel disappears, the targets go back to normal, and the gate swings open.
     void Solve()
     {
         Log("Solved.");
-        solved = true;
-        showBackground = false;
-        solvedTime = Time.time;
 
-        // No closing message: the panel just disappears and the gate swings open.
+        if (spawner != null)
+        {
+            spawner.StopSpawning();
+        }
+
+        RestoreTargets();
         ShowRoundUI(false);
         SetText(displayText, "");
         SetText(messageText, "");
@@ -509,47 +473,21 @@ public class NumberPuzzle : MonoBehaviour
         return alive;
     }
 
-    // Writes the digit count times with spaces between, like "3   3".
-    string BuildDisplay(int digit, int count)
-    {
-        string display = "";
-        for (int i = 0; i < count; i++)
-        {
-            if (i > 0)
-            {
-                display += "   ";
-            }
-            display += digit.ToString();
-        }
-        return display;
-    }
-
-    void ShowRule(Rule rule)
-    {
-        SetText(ruleText, (rule == Rule.Digit) ? "DIGIT" : "COUNT");
-
-        if (ruleBadge != null)
-        {
-            ruleBadge.color = (rule == Rule.Digit) ? digitColor : countColor;
-        }
-    }
-
-    void SetBadgeVisible(bool visible)
+    // Turns the instruction, timer and progress on for rounds, off for announcements.
+    void ShowRoundUI(bool visible)
     {
         if (ruleBadge != null)
         {
             ruleBadge.gameObject.SetActive(visible);
         }
-    }
-
-    // Turns the rule badge, timer and progress on for rounds, off for announcements.
-    void ShowRoundUI(bool visible)
-    {
-        SetBadgeVisible(visible);
-
-        if (timerBar != null)
+        else if (ruleText != null)
         {
-            timerBar.SetActive(visible && roundTime > 0f);
+            ruleText.gameObject.SetActive(visible);
+        }
+
+        if (timerBar != null && !visible)
+        {
+            timerBar.SetActive(false);
         }
 
         if (progressText != null)
@@ -559,7 +497,7 @@ public class NumberPuzzle : MonoBehaviour
     }
 
     // Drains from full to empty over the round, turning red in the last third.
-    void UpdateTimerBar(float timeLeft)
+    void UpdateTimerBar(float timeLeft, float roundTime)
     {
         if (timerFill == null || roundTime <= 0f)
         {
@@ -571,22 +509,35 @@ public class NumberPuzzle : MonoBehaviour
         timerFill.color = (left < 0.33f) ? timerLowColor : timerColor;
     }
 
-    // One dot per round, filled for the ones already cleared.
+    // Warm-up shows "Warm-up 1 / 2". Main rounds show dots for cleared rounds and an X per miss.
     void UpdateProgress()
     {
-        int totalRounds = warmupRounds + challengeRounds;
-        string dots = "";
+        if (inWarmup)
+        {
+            SetText(progressText, "Warm-up " + Mathf.Min(warmupDone + 1, warmupRounds) + " / " + warmupRounds);
+            return;
+        }
 
-        for (int i = 0; i < totalRounds; i++)
+        string text = "";
+        for (int i = 0; i < mainRounds; i++)
         {
             if (i > 0)
             {
-                dots += " ";
+                text += " ";
             }
-            dots += (i < round) ? "●" : "○";
+            text += (i < mainDone) ? "●" : "○";
         }
 
-        SetText(progressText, dots);
+        if (misses > 0)
+        {
+            text += "     ";
+            for (int i = 0; i < misses; i++)
+            {
+                text += "X";
+            }
+        }
+
+        SetText(progressText, text);
     }
 
     // The panel briefly takes on a color, then fades back.
@@ -604,18 +555,10 @@ public class NumberPuzzle : MonoBehaviour
         }
 
         flashAmount = Mathf.Max(0f, flashAmount - Time.deltaTime * 2.5f);
-
-        // Outside the rounds the box is fully see-through, so only the text shows.
-        Color baseColor = panelColor;
-        if (backgroundOnlyDuringRounds && !showBackground)
-        {
-            baseColor = new Color(panelColor.r, panelColor.g, panelColor.b, 0f);
-        }
-
-        panelImage.color = Color.Lerp(baseColor, flashColor, flashAmount);
+        panelImage.color = Color.Lerp(panelColor, flashColor, flashAmount);
     }
 
-    // The numbers briefly grow when they change, so a new round catches the eye.
+    // The number briefly grows when it changes, so a new round catches the eye.
     void Pop()
     {
         popAmount = 1f;
