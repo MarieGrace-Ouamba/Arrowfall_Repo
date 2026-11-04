@@ -1,4 +1,10 @@
-
+// EnemyHealth.cs
+// Rayan Alduhaiman
+// IT 485/585 - ArrowFall
+// Gives a guard health. Arrow.cs delivers the damage by calling TakeDamage on what it hits.
+// With 100 health and a full-draw arrow doing 50, two full draws kill a guard.
+// Plays a metal clang from the guard's armor every time it is hit.
+// On death the guard plays its Death animation and the body stays on the ground.
 
 using UnityEngine;
 using UnityEngine.AI;
@@ -103,7 +109,7 @@ public class EnemyHealth : MonoBehaviour
         Animator animator = GetComponentInChildren<Animator>();
         if (animator != null)
         {
-            animator.CrossFadeInFixedTime("Base Layer." + deathState, 0.1f, 0)
+            animator.CrossFadeInFixedTime("Base Layer." + deathState, 0.1f, 0);
         }
 
         if (removeBody)
