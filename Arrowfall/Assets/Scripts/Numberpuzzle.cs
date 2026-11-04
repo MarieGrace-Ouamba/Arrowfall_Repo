@@ -1,16 +1,3 @@
-// NumberPuzzle.cs
-// Rayan Alduhaiman
-// IT 485/585 - ArrowFall
-// The gate puzzle, run as one sequence from start to finish:
-//   1. Wait until every guard is dead, then announce it.
-//   2. Wait for the player to come to the gate, then count down.
-//   3. Warm-up: a couple of untimed rounds. Hit the number shown. Misses do not count.
-//   4. Main rounds: they get harder as they go. The time limit shrinks each round,
-//      and from a set round on, the targets swap their numbers every round.
-//      Three misses (wrong target or too slow) restart the main rounds.
-//   5. When every main round is cleared, the gate opens.
-// An optional EnemySpawner keeps sending guards while the rounds run.
-
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -30,18 +17,18 @@ public class NumberPuzzle : MonoBehaviour
     public GateController gate;
 
     [Header("UI")]
-    public GameObject panel;                 // the whole puzzle panel, shown and hidden as one
-    public Image panelImage;                 // the panel background, flashes green or red (optional)
-    public TMP_Text displayText;             // the big number
-    public Image ruleBadge;                  // the box holding the instruction (optional)
-    public TMP_Text ruleText;                // the instruction above the number
-    public GameObject timerBar;              // the timer bar, only shown in timed rounds
-    public Image timerFill;                  // Image Type: Filled, Fill Method: Horizontal
-    public TMP_Text progressText;            // progress dots and misses
-    public TMP_Text messageText;             // Correct, Wrong, announcements
+    public GameObject panel;
+    public Image panelImage;
+    public TMP_Text displayText;
+    public Image ruleBadge;
+    public TMP_Text ruleText;
+    public GameObject timerBar;
+    public Image timerFill;
+    public TMP_Text progressText;
+    public TMP_Text messageText;
 
     [Header("Text")]
-    public string instruction = "HIT";       // shown above the number each round
+    public string instruction = "HIT";
 
     [Header("Colors")]
     public Color panelColor = new Color(0f, 0f, 0f, 0f);
@@ -51,31 +38,31 @@ public class NumberPuzzle : MonoBehaviour
     public Color timerLowColor = new Color(0.9f, 0.2f, 0.2f);
 
     [Header("Start Condition")]
-    public bool waitForGuards = true;        // the puzzle begins only after these guards are dead
-    public EnemyHealth[] guards;             // leave empty to use every guard in the level
+    public bool waitForGuards = true;
+    public EnemyHealth[] guards;
     public string guardsClearedMessage = "Outside guards eliminated";
-    public float messageTime = 2.5f;         // seconds announcements stay up
-    public int startCountdown = 3;           // "3, 2, 1" before the warm-up
+    public float messageTime = 2.5f;
+    public int startCountdown = 3;
 
     [Header("Enemies During Puzzle")]
-    public EnemySpawner spawner;             // optional, keeps sending guards while the puzzle runs
-    public bool spawnDuringWarmup = false;   // tick to start spawning from the warm-up instead of the main rounds
+    public EnemySpawner spawner;
+    public bool spawnDuringWarmup = false;
 
     [Header("Visibility")]
-    public float showDistance = 25f;         // the panel appears when the player is this close to the puzzle
+    public float showDistance = 25f;
 
     [Header("Rounds")]
-    public int warmupRounds = 2;             // untimed practice rounds, misses do not count
-    public int mainRounds = 6;               // rounds that get harder and must all be cleared
-    public int maxMisses = 3;                // this many misses restarts the main rounds
+    public int warmupRounds = 2;
+    public int mainRounds = 6;
+    public int maxMisses = 3;
     [Range(2, 4)]
-    public int highestNumber = 4;            // must match the targets, numbered 1 up to this
+    public int highestNumber = 4;
 
     [Header("Difficulty")]
-    public float startRoundTime = 6f;        // seconds allowed in the first main round
-    public float endRoundTime = 2.5f;        // seconds allowed in the last main round
-    public int shuffleFromRound = 4;         // from this main round on, targets swap numbers every round (0 = never)
-    public bool timeoutCountsAsMiss = true;  // running out of time counts toward the misses
+    public float startRoundTime = 6f;
+    public float endRoundTime = 2.5f;
+    public int shuffleFromRound = 4;
+    public bool timeoutCountsAsMiss = true;
 
     [Header("Timing")]
     public float pauseBetweenRounds = 0.8f;
@@ -87,14 +74,11 @@ public class NumberPuzzle : MonoBehaviour
     [Range(0f, 1f)]
     public float soundVolume = 1f;
 
-    [Header("Testing")]
-    public bool debugLogs = true;            // prints each step to the Console, turn off when it works
-
     private Transform player;
-    private bool panelWanted = false;        // true once the puzzle has something to show
-    private float forceShowUntil = 0f;       // keeps the panel up for announcements, even far away
+    private bool panelWanted = false;
+    private float forceShowUntil = 0f;
 
-    private bool acceptingHits = false;      // only true while a round is waiting for an answer
+    private bool acceptingHits = false;
     private Result pendingResult = Result.None;
     private int answer;
     private int lastNumber = 0;
@@ -105,7 +89,7 @@ public class NumberPuzzle : MonoBehaviour
     private int misses = 0;
 
     private NumberTarget[] targets;
-    private int[] originalNumbers;           // each target's own number, restored when not shuffling
+    private int[] originalNumbers;
 
     private float flashAmount = 0f;
     private Color flashColor;
@@ -156,20 +140,15 @@ public class NumberPuzzle : MonoBehaviour
         }
     }
 
-    // The whole puzzle, step by step.
     IEnumerator RunPuzzle()
     {
-        // 1. Guards.
         if (waitForGuards && guards.Length > 0)
         {
-            Log("Waiting for " + GuardsAlive() + " guards to die.");
-
             while (GuardsAlive() > 0)
             {
                 yield return null;
             }
 
-            Log("All guards dead.");
             panelWanted = true;
             SetText(displayText, "");
             SetText(messageText, guardsClearedMessage);
@@ -179,8 +158,6 @@ public class NumberPuzzle : MonoBehaviour
 
         panelWanted = true;
 
-        // 2. Player at the gate, then countdown.
-        Log("Waiting for the player to come within " + showDistance + " m.");
         SetText(displayText, "");
         SetText(messageText, "");
 
@@ -199,7 +176,6 @@ public class NumberPuzzle : MonoBehaviour
 
         ShowRoundUI(true);
 
-        // 3. Warm-up: untimed, misses do not count.
         if (spawner != null && spawnDuringWarmup)
         {
             spawner.StartSpawning();
@@ -238,7 +214,6 @@ public class NumberPuzzle : MonoBehaviour
             ShowRoundUI(true);
         }
 
-        // 4. Main rounds: shrinking time, shuffled targets later on, three misses restart.
         if (spawner != null)
         {
             spawner.StartSpawning();
@@ -278,7 +253,6 @@ public class NumberPuzzle : MonoBehaviour
 
             if (misses >= maxMisses)
             {
-                Log(maxMisses + " misses, restarting the main rounds.");
                 mainDone = 0;
                 misses = 0;
                 UpdateProgress();
@@ -293,11 +267,9 @@ public class NumberPuzzle : MonoBehaviour
             }
         }
 
-        // 5. Done.
         Solve();
     }
 
-    // Waits for a target hit, or for the time limit if the round is timed.
     IEnumerator WaitForResult(float roundTime)
     {
         pendingResult = Result.None;
@@ -306,7 +278,6 @@ public class NumberPuzzle : MonoBehaviour
 
         while (pendingResult == Result.None)
         {
-            // The clock only runs while the player is at the gate.
             if (roundTime > 0f && IsPlayerNear())
             {
                 timeLeft -= Time.deltaTime;
@@ -324,7 +295,6 @@ public class NumberPuzzle : MonoBehaviour
         acceptingHits = false;
     }
 
-    // Picks a new number, sets the targets, and puts everything on screen.
     void SetUpRound(float roundTime, bool shuffle)
     {
         if (shuffle)
@@ -336,7 +306,6 @@ public class NumberPuzzle : MonoBehaviour
             RestoreTargets();
         }
 
-        // A different number from last round, so every round visibly changes.
         do
         {
             answer = Random.Range(1, highestNumber + 1);
@@ -358,11 +327,8 @@ public class NumberPuzzle : MonoBehaviour
         Pop();
 
         string stage = inWarmup ? "Warm-up " + (warmupDone + 1) : "Main " + (mainDone + 1);
-        Log(stage + ": hit " + answer + (roundTime > 0f ? ", " + roundTime.ToString("F1") + " s" : ", untimed")
-            + (shuffle ? ", targets shuffled" : ""));
     }
 
-    // Gives the targets their numbers in a random order and updates their labels.
     void ShuffleTargets()
     {
         int[] numbers = (int[])originalNumbers.Clone();
@@ -378,7 +344,6 @@ public class NumberPuzzle : MonoBehaviour
         ApplyNumbers(numbers);
     }
 
-    // Puts every target back on its own number.
     void RestoreTargets()
     {
         ApplyNumbers(originalNumbers);
@@ -396,17 +361,14 @@ public class NumberPuzzle : MonoBehaviour
         }
     }
 
-    // Called by a NumberTarget when an arrow hits it.
     public void TargetHit(NumberTarget target)
     {
         if (!acceptingHits || pendingResult != Result.None)
         {
-            Log("Target " + target.number + " hit, but no round is waiting for an answer.");
             return;
         }
 
         pendingResult = (target.number == answer) ? Result.Correct : Result.Wrong;
-        Log("Target " + target.number + " hit: " + pendingResult);
     }
 
     void Correct()
@@ -421,11 +383,8 @@ public class NumberPuzzle : MonoBehaviour
         Flash(wrongColor);
     }
 
-    // The panel disappears, the targets go back to normal, and the gate swings open.
     void Solve()
     {
-        Log("Solved.");
-
         if (spawner != null)
         {
             spawner.StopSpawning();
@@ -444,11 +403,8 @@ public class NumberPuzzle : MonoBehaviour
         }
         else
         {
-            Log("No gate assigned, so nothing opens.");
         }
     }
-
-    // ---------- Helpers ----------
 
     bool IsPlayerNear()
     {
@@ -459,7 +415,6 @@ public class NumberPuzzle : MonoBehaviour
         return Vector3.Distance(player.position, transform.position) <= showDistance;
     }
 
-    // Counts guards that are still alive. A guard whose body was removed counts as dead.
     int GuardsAlive()
     {
         int alive = 0;
@@ -473,7 +428,6 @@ public class NumberPuzzle : MonoBehaviour
         return alive;
     }
 
-    // Turns the instruction, timer and progress on for rounds, off for announcements.
     void ShowRoundUI(bool visible)
     {
         if (ruleBadge != null)
@@ -496,7 +450,6 @@ public class NumberPuzzle : MonoBehaviour
         }
     }
 
-    // Drains from full to empty over the round, turning red in the last third.
     void UpdateTimerBar(float timeLeft, float roundTime)
     {
         if (timerFill == null || roundTime <= 0f)
@@ -509,7 +462,6 @@ public class NumberPuzzle : MonoBehaviour
         timerFill.color = (left < 0.33f) ? timerLowColor : timerColor;
     }
 
-    // Warm-up shows "Warm-up 1 / 2". Main rounds show dots for cleared rounds and an X per miss.
     void UpdateProgress()
     {
         if (inWarmup)
@@ -540,7 +492,6 @@ public class NumberPuzzle : MonoBehaviour
         SetText(progressText, text);
     }
 
-    // The panel briefly takes on a color, then fades back.
     void Flash(Color color)
     {
         flashColor = color;
@@ -558,7 +509,6 @@ public class NumberPuzzle : MonoBehaviour
         panelImage.color = Color.Lerp(panelColor, flashColor, flashAmount);
     }
 
-    // The number briefly grows when it changes, so a new round catches the eye.
     void Pop()
     {
         popAmount = 1f;
@@ -591,11 +541,4 @@ public class NumberPuzzle : MonoBehaviour
         }
     }
 
-    void Log(string message)
-    {
-        if (debugLogs)
-        {
-            Debug.Log("[NumberPuzzle] " + message);
-        }
-    }
 }

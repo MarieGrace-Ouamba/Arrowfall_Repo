@@ -524,7 +524,6 @@ MonoBehaviour:
   wrongSound: {fileID: 0}
   solvedSound: {fileID: 0}
   soundVolume: 1
-  debugLogs: 1
 --- !u!1 &54829996
 GameObject:
   m_ObjectHideFlags: 0
@@ -2681,15 +2680,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1349308167412868240, guid: 883fc6d2afab7d640ba36ceec7377fe9, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -70
+      value: 19.52
       objectReference: {fileID: 0}
     - target: {fileID: 1349308167412868240, guid: 883fc6d2afab7d640ba36ceec7377fe9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.77
+      value: 5.9
       objectReference: {fileID: 0}
     - target: {fileID: 1349308167412868240, guid: 883fc6d2afab7d640ba36ceec7377fe9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 83
+      value: 72.52
       objectReference: {fileID: 0}
     - target: {fileID: 1349308167412868240, guid: 883fc6d2afab7d640ba36ceec7377fe9, type: 3}
       propertyPath: m_LocalRotation.w
@@ -8387,15 +8386,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1349308167412868240, guid: 883fc6d2afab7d640ba36ceec7377fe9, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -70
+      value: 22.2
       objectReference: {fileID: 0}
     - target: {fileID: 1349308167412868240, guid: 883fc6d2afab7d640ba36ceec7377fe9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.7
+      value: 4.59
       objectReference: {fileID: 0}
     - target: {fileID: 1349308167412868240, guid: 883fc6d2afab7d640ba36ceec7377fe9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 83
+      value: 62.21
       objectReference: {fileID: 0}
     - target: {fileID: 1349308167412868240, guid: 883fc6d2afab7d640ba36ceec7377fe9, type: 3}
       propertyPath: m_LocalRotation.w

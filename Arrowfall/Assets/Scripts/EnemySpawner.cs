@@ -1,10 +1,3 @@
-// EnemySpawner.cs
-// Rayan Alduhaiman
-// IT 485/585 - ArrowFall
-// Keeps sending guards at the player while the gate puzzle runs.
-// NumberPuzzle calls StartSpawning() when the rounds begin and StopSpawning() when the gate opens.
-// Never more than maxAlive spawned guards at once, so the puzzle stays possible.
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,15 +6,15 @@ using UnityEngine.AI;
 public class EnemySpawner : MonoBehaviour
 {
     [Header("Spawning")]
-    public GameObject enemyPrefab;           // the Enemy prefab from Assets/Prefabs
-    public Transform[] spawnPoints;          // empty objects where guards appear, on the NavMesh
-    public float firstSpawnDelay = 3f;       // seconds before the first guard appears
-    public float spawnInterval = 8f;         // seconds between guards
-    public int maxAlive = 2;                 // never more than this many spawned guards at once
+    public GameObject enemyPrefab;
+    public Transform[] spawnPoints;
+    public float firstSpawnDelay = 3f;
+    public float spawnInterval = 8f;
+    public int maxAlive = 2;
 
     [Header("Spawned Guards")]
-    public bool huntPlayer = true;           // spawned guards see the player from anywhere, so they always come
-    public bool removeBodies = true;         // dead spawned guards disappear after a while
+    public bool huntPlayer = true;
+    public bool removeBodies = true;
     public float bodyRemoveDelay = 5f;
 
     [Header("Testing")]
@@ -50,7 +43,7 @@ public class EnemySpawner : MonoBehaviour
 
         spawning = true;
         spawnRoutine = StartCoroutine(SpawnLoop());
-        Log("Spawning started.");
+  
     }
 
     public void StopSpawning()
@@ -62,7 +55,7 @@ public class EnemySpawner : MonoBehaviour
             StopCoroutine(spawnRoutine);
         }
 
-        Log("Spawning stopped.");
+  
     }
 
     IEnumerator SpawnLoop()
@@ -71,7 +64,6 @@ public class EnemySpawner : MonoBehaviour
 
         while (spawning)
         {
-            // Forget guards that died or were removed.
             alive.RemoveAll(guard => guard == null || guard.IsDead());
 
             if (alive.Count < maxAlive)
@@ -87,20 +79,17 @@ public class EnemySpawner : MonoBehaviour
     {
         if (enemyPrefab == null || spawnPoints == null || spawnPoints.Length == 0)
         {
-            Log("No enemy prefab or spawn points assigned.");
+            
             return;
         }
 
         Transform point = spawnPoints[Random.Range(0, spawnPoints.Length)];
 
-        // Snap to the nearest spot on the NavMesh, or the guard could not walk.
         if (!NavMesh.SamplePosition(point.position, out NavMeshHit hit, 5f, NavMesh.AllAreas))
         {
-            Log("Spawn point " + point.name + " is not near the NavMesh. Move it onto the blue area.");
             return;
         }
 
-        // Face the player, so the guard sees them straight away.
         Quaternion facing = point.rotation;
         if (player != null)
         {
