@@ -25,7 +25,7 @@ public class EnemyChase : MonoBehaviour
         // instead of the player in the scene, so guards work in any scene.
         if (player == null || !player.gameObject.scene.IsValid())
         {
-            PlayerMovement playerMovement = FindObjectOfType<PlayerMovement>();
+            PlayerMovement playerMovement = FindFirstObjectByType<PlayerMovement>();
             if (playerMovement != null)
                 player = playerMovement.transform;
         }
