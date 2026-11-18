@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 24effd6ab0285e34891901b652472303
+timeCreated: 1486325112
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 84470
+  packageName: Prison cell
+  packageVersion: 1.0
+  assetPath: Assets/Prison cell/Models/Walls/Materials/Wall.mat
+  uploadId: 165354

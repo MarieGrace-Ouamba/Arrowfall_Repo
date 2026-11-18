@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 258e8386d33b16b4c8e071b650aeba55
+timeCreated: 1486416850
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 84470
+  packageName: Prison cell
+  packageVersion: 1.0
+  assetPath: Assets/Prison cell/Models/Walls/Materials/Doorway.mat
+  uploadId: 165354

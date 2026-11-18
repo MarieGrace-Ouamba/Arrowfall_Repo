@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5e15495caac237a4e9b163f6e6916756
+timeCreated: 1488467814
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 84470
+  packageName: Prison cell
+  packageVersion: 1.0
+  assetPath: Assets/Prison cell/Prefabs/Props/Lattice.prefab
+  uploadId: 165354

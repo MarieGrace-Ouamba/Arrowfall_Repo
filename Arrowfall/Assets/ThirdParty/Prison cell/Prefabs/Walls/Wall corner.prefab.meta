@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 22f969c604df7b04293ae9527d1f9adf
+timeCreated: 1488210732
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 84470
+  packageName: Prison cell
+  packageVersion: 1.0
+  assetPath: Assets/Prison cell/Prefabs/Walls/Wall corner.prefab
+  uploadId: 165354

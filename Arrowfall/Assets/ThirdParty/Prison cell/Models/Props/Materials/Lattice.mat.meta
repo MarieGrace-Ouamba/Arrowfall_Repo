@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 21bfd3826f4f3ce418aed62344031285
+timeCreated: 1488404047
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 84470
+  packageName: Prison cell
+  packageVersion: 1.0
+  assetPath: Assets/Prison cell/Models/Props/Materials/Lattice.mat
+  uploadId: 165354
