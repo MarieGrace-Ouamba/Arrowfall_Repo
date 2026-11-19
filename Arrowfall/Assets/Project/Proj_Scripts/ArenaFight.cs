@@ -8,6 +8,8 @@ public class ArenaFight : MonoBehaviour
     public BossHealthBar bossBar;
     public GameObject entranceBlocker;
 
+    public AudioSource entrancesound;
+
     private bool fightStarted = false;
 
     void Start()
