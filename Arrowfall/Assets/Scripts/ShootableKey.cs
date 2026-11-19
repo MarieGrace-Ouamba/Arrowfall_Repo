@@ -23,6 +23,7 @@ public class ShootableKey : MonoBehaviour
 
     private Rigidbody rb;
     private bool isShot = false;
+    private float shotTime = 0f;
 
     void Awake()
     {
@@ -46,6 +47,7 @@ public class ShootableKey : MonoBehaviour
             return;
         }
         isShot = true;
+        shotTime = Time.time;
 
         // Leave the rafter but keep its current world position.
         transform.SetParent(null, true);
@@ -79,5 +81,12 @@ public class ShootableKey : MonoBehaviour
     public bool IsShot()
     {
         return isShot;
+    }
+
+    // True once the key has been shot down and has come to rest on the floor.
+    // Used for the automatic pick-up, so the key cannot be grabbed out of the air.
+    public bool HasLanded()
+    {
+        return isShot && Time.time - shotTime > 0.4f && rb.linearVelocity.sqrMagnitude < 0.25f;
     }
 }

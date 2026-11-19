@@ -28,6 +28,7 @@ public class ShedEscape : MonoBehaviour
     [Header("Reach")]
     public float doorRange = 3f;            // how close counts as "at the door"
     public float keyRange = 2.5f;           // how close counts as "at the fallen key"
+    public bool autoPickup = true;          // pick the fallen key up by walking onto it, with no prompt
 
     [Header("Messages")]
     public string startMessage = "Find the key to get out";
@@ -82,7 +83,8 @@ public class ShedEscape : MonoBehaviour
             return;
         }
 
-        if (doorOpened)
+        // Nothing here can be used while the game is paused or over.
+        if (doorOpened || Time.timeScale == 0f)
         {
             SetPrompt("");
             return;
@@ -90,8 +92,16 @@ public class ShedEscape : MonoBehaviour
 
         bool pressed = Input.GetKeyDown(interactKey);
 
+        // With auto pick-up the key is taken as soon as the player walks onto it,
+        // but only after it has landed, so it cannot be grabbed out of the air.
+        if (autoPickup && key != null && !keyCollected && key.HasLanded() && NearKey())
+        {
+            PickUpKey();
+            return;
+        }
+
         // The fallen key takes priority while the player is standing over it.
-        if (key != null && key.IsShot() && !keyCollected && NearKey())
+        if (!autoPickup && key != null && key.IsShot() && !keyCollected && NearKey())
         {
             SetPrompt(promptPickup);
             if (pressed)
