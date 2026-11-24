@@ -32,7 +32,8 @@ public class EnemyAttack : MonoBehaviour
     // Uses the player EnemyChase already knows about, or finds the object tagged Player.
     void FindPlayerHealth()
     {
-        if (chase.player != null)
+        // Only trust the chase target if it is the player in the scene, not the prefab file.
+        if (chase.player != null && chase.player.gameObject.scene.IsValid())
         {
             playerHealth = chase.player.GetComponent<PlayerHealth>();
         }

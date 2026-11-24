@@ -386,6 +386,7 @@ MonoBehaviour:
   arrowPrefab: {fileID: 6225888053948203410, guid: 4d92b44c17014f74785db8b58585d8d3, type: 3}
   firePoint: {fileID: 4933351068882577172}
   spawnDistance: 0.8
+  maxAimDistance: 200
   audioSource: {fileID: 0}
   drawSound: {fileID: 8300000, guid: ab0d545c86f868a47949b08771b3936f, type: 3}
   drawSoundCutoff: 1.5
@@ -679,6 +680,7 @@ GameObject:
   - component: {fileID: 201711893692105975}
   - component: {fileID: 8073089521463934498}
   - component: {fileID: 1961708307085383384}
+  - component: {fileID: 3952651136016061095}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -700,6 +702,7 @@ RectTransform:
   m_Children:
   - {fileID: 3716958171284785597}
   - {fileID: 5205473876019032443}
+  - {fileID: 5460710857064757603}
   m_Father: {fileID: 3981969950690606504}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -795,6 +798,23 @@ MonoBehaviour:
   buttonFadeTime: 0.3
   pulseSpeed: 3
   pulseAmount: 0.05
+--- !u!114 &3952651136016061095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3645448864910890690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c80915ea4bec3c478130d41b112fd57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Crosshair
+  bow: {fileID: 8338034484086012077}
+  dot: {fileID: 5765033436916057503}
+  alwaysVisible: 1
+  restAlpha: 0.5
+  drawStartAlpha: 0.7
 --- !u!1 &4256678832369966266
 GameObject:
   m_ObjectHideFlags: 0
@@ -944,6 +964,7 @@ GameObject:
   - component: {fileID: 1300270001514046683}
   - component: {fileID: 4706281536761559968}
   - component: {fileID: 8529882642403306470}
+  - component: {fileID: 4733543055662290895}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1033,6 +1054,18 @@ MonoBehaviour:
   halfColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   emptyColor: {r: 1, g: 0, b: 0, a: 1}
   allowTestKeys: 1
+--- !u!114 &4733543055662290895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5813131990585453571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c19624ef3b47704894853cf33c93a6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawn
 --- !u!1 &6413077261066329801
 GameObject:
   m_ObjectHideFlags: 0
@@ -1144,6 +1177,81 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &7303863151218065757
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5460710857064757603}
+  - component: {fileID: 2985198822818059034}
+  - component: {fileID: 5765033436916057503}
+  m_Layer: 5
+  m_Name: Crosshair
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5460710857064757603
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7303863151218065757}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5552683117638595114}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 8, y: 8}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &2985198822818059034
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7303863151218065757}
+  m_CullTransparentMesh: 1
+--- !u!114 &5765033436916057503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7303863151218065757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &7538097453533628586
 GameObject:
   m_ObjectHideFlags: 0
