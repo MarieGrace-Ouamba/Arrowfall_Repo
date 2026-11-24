@@ -17,5 +17,6 @@ public class GateKey : MonoBehaviour
         {
             anim.enabled = true;   // plays the GateOpen animation
         }
+
     }
 }
