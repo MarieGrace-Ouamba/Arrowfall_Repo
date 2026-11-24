@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9c96e29a2366f3342bdf6f871e66b57d
+timeCreated: 1488293362
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 84470
+  packageName: Prison cell
+  packageVersion: 1.0
+  assetPath: Assets/Prison cell/Prefabs/Props/Chain.prefab
+  uploadId: 165354

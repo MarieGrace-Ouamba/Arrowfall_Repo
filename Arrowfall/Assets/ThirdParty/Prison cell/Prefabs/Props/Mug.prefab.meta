@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6231e68dd2e0273499bfb745c95273ac
+timeCreated: 1488377905
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 84470
+  packageName: Prison cell
+  packageVersion: 1.0
+  assetPath: Assets/Prison cell/Prefabs/Props/Mug.prefab
+  uploadId: 165354

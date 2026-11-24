@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 96d9cc5ace9e5914c9af7ab662c6e122
+timeCreated: 1488042827
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 84470
+  packageName: Prison cell
+  packageVersion: 1.0
+  assetPath: Assets/Prison cell/Models/Props/Materials/Table.mat
+  uploadId: 165354
