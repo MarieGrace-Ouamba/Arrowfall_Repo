@@ -292,10 +292,10 @@ RectTransform:
   - {fileID: 133323534}
   m_Father: {fileID: 858808576}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 350, y: -35}
-  m_SizeDelta: {x: 700, y: 70}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &48920678
 MonoBehaviour:
@@ -3464,10 +3464,10 @@ RectTransform:
   - {fileID: 26305278}
   m_Father: {fileID: 2020852929}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 480, y: -50}
-  m_SizeDelta: {x: 300, y: 100}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &995184664
 MonoBehaviour:
@@ -3581,11 +3581,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7148deadb0b1d524a8266486e5e350e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RiddleDoor
-  bossChase: {fileID: 0}
-  bossAttack: {fileID: 0}
-  bossBar: {fileID: 0}
+  riddle: The more you take from me, the larger I become. What am I?
+  answer1: A shadow
+  answer2: A hole
+  answer3: A debt
+  correctAnswer: 2
+  hintObject: {fileID: 590609122}
+  riddlePanel: {fileID: 1649780869}
+  questionText: {fileID: 804116823}
+  feedbackText: {fileID: 986892083}
+  answerButton1: {fileID: 48920680}
+  answerButton2: {fileID: 1266172535}
+  answerButton3: {fileID: 1109976765}
+  closeButton: {fileID: 524182300}
+  arenaDoor: {fileID: 1272009407}
+  bossChase: {fileID: 438729794}
+  bossAttack: {fileID: 438729793}
+  bossBar: {fileID: 956260889}
   entranceBlocker: {fileID: 0}
-  entranceSound: {fileID: 0}
+  entranceSound: {fileID: 438729799}
 --- !u!65 &1063993989
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3795,10 +3809,10 @@ RectTransform:
   - {fileID: 1865707080}
   m_Father: {fileID: 858808576}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 350, y: -205}
-  m_SizeDelta: {x: 700, y: 70}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1109976763
 MonoBehaviour:
@@ -4194,10 +4208,10 @@ RectTransform:
   - {fileID: 666028838}
   m_Father: {fileID: 858808576}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 350, y: -120}
-  m_SizeDelta: {x: 700, y: 70}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1266172533
 MonoBehaviour:
@@ -5343,7 +5357,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -80}
+  m_AnchoredPosition: {x: 0, y: -27}
   m_SizeDelta: {x: 900, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1649780871
@@ -5528,7 +5542,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1739541488
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6069,10 +6083,10 @@ RectTransform:
   - {fileID: 1411670700}
   m_Father: {fileID: 2020852929}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 480, y: -180}
-  m_SizeDelta: {x: 300, y: 100}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1819987971
 MonoBehaviour:
@@ -6459,10 +6473,10 @@ RectTransform:
   - {fileID: 1071148131}
   m_Father: {fileID: 2020852929}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 150, y: -50}
-  m_SizeDelta: {x: 300, y: 100}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1929369322
 MonoBehaviour:
@@ -6580,10 +6594,10 @@ RectTransform:
   - {fileID: 1203267257}
   m_Father: {fileID: 2020852929}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 150, y: -180}
-  m_SizeDelta: {x: 300, y: 100}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1993832376
 MonoBehaviour:
@@ -7167,6 +7181,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5091841865451840, guid: 14921a7f34e5618419d967cc8f5b8ade, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.26
+      objectReference: {fileID: 0}
     - target: {fileID: 763241811974288771, guid: 14921a7f34e5618419d967cc8f5b8ade, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.5
@@ -8709,8 +8727,8 @@ SceneRoots:
   - {fileID: 1321773719}
   - {fileID: 1739541488}
   - {fileID: 2069949301}
-  - {fileID: 784132795}
   - {fileID: 438729790}
+  - {fileID: 784132795}
   - {fileID: 1880719893}
   - {fileID: 1063993990}
   - {fileID: 1702665437}
